@@ -12,10 +12,12 @@ let editingSlot = null;
 document.addEventListener('DOMContentLoaded', () => {
   loadState();
   initTheme();
-  initAntiCopy();          // ← Anti-copy aktif
+  initAntiCopy();
+  initWidget();
   setupEventListeners();
   renderPinned();
   renderAllCities();
+  highlightPinnedActive();
   startClock();
 });
 
@@ -49,6 +51,7 @@ function setupEventListeners() {
     showOverrideBadge(input.trim());
     renderPinned();
     renderAllCities();
+    renderWidget();
   });
 
   document.getElementById('overrideInput').addEventListener('keydown', (e) => {
@@ -81,8 +84,9 @@ function setupEventListeners() {
   });
 
   document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && !document.getElementById('pickerModal').hidden) {
-      closePicker();
+    if (e.key === 'Escape') {
+      if (!document.getElementById('pickerModal').hidden) closePicker();
+      if (!document.getElementById('widgetPickerModal').hidden) closeWidgetPicker();
     }
   });
 }
@@ -96,6 +100,7 @@ function resetOverride() {
   document.getElementById('overrideBadge').hidden = true;
   renderPinned();
   renderAllCities();
+  renderWidget();
 }
 
 function showOverrideBadge(label) {
@@ -119,6 +124,8 @@ function renderPinned() {
 
     const card = document.createElement('div');
     card.className = 'pinned-card';
+    card.dataset.pinnedIndex = index;
+    card.dataset.pinnedCity = city.id;
     card.innerHTML = `
       <div class="pinned-header">
         <div class="pinned-city">
@@ -131,13 +138,20 @@ function renderPinned() {
         <button class="change-btn" data-slot="${index}">Ganti</button>
       </div>
       <div class="digital-clock" data-pinned-time="${index}">
-        ${time.hour}:${time.minute}<span class="seconds">:${time.second}</span>
+        <span class="hm">${time.hour}:${time.minute}</span><span class="seconds">:${time.second}</span>
       </div>
       <div class="date-line">
         <span>${date}</span>
         <span class="tz-badge">${offset}</span>
       </div>
     `;
+
+    // Klik kartu → set aktif di widget
+    card.addEventListener('click', (e) => {
+      if (e.target.classList.contains('change-btn') || e.target.closest('.change-btn')) return;
+      setActiveWidgetCity(city.id);
+    });
+
     grid.appendChild(card);
   });
 
@@ -212,7 +226,7 @@ function updateClocks() {
 
     const clockEl = document.querySelector(`[data-pinned-time="${index}"]`);
     if (clockEl) {
-      clockEl.innerHTML = `${time.hour}:${time.minute}<span class="seconds">:${time.second}</span>`;
+      clockEl.innerHTML = `<span class="hm">${time.hour}:${time.minute}</span><span class="seconds">:${time.second}</span>`;
     }
     const card = clockEl?.closest('.pinned-card');
     if (card) {
@@ -235,6 +249,9 @@ function updateClocks() {
       dateEl.textContent = date;
     }
   });
+
+  // Update widget juga
+  updateWidgetClocks();
 }
 
 // ===== PICKER MODAL =====
@@ -273,9 +290,18 @@ function renderPickerList(query) {
     `;
     item.addEventListener('click', () => {
       if (editingSlot !== null) {
+        const oldId = pinnedIds[editingSlot];
         pinnedIds[editingSlot] = city.id;
         savePinned();
+
+        // Update widget juga
+        widgetCities = widgetCities.map(c => c === oldId ? city.id : c);
+        if (activeWidgetCity === oldId) activeWidgetCity = city.id;
+        saveWidgetState();
+
         renderPinned();
+        renderWidget();
+        highlightPinnedActive();
         closePicker();
       }
     });
