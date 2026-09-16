@@ -2,7 +2,6 @@
 // WORLD CLOCK — Logic UI
 // ============================================
 
-// ===== STATE =====
 const DEFAULT_PINNED = ['jakarta', 'singapore', 'colombo'];
 let pinnedIds = [...DEFAULT_PINNED];
 let activeRegion = 'all';
@@ -12,6 +11,7 @@ let editingSlot = null;
 // ===== INIT =====
 document.addEventListener('DOMContentLoaded', () => {
   loadState();
+  initTheme();
   setupEventListeners();
   renderPinned();
   renderAllCities();
@@ -25,8 +25,6 @@ function loadState() {
     if (Array.isArray(savedPinned) && savedPinned.length === 3) {
       pinnedIds = savedPinned;
     }
-    const savedTheme = localStorage.getItem('wc_theme');
-    if (savedTheme) document.documentElement.setAttribute('data-theme', savedTheme);
   } catch (e) { /* ignore */ }
 }
 
@@ -36,16 +34,6 @@ function savePinned() {
 
 // ===== EVENT LISTENERS =====
 function setupEventListeners() {
-  // Theme toggle
-  document.getElementById('themeToggle').addEventListener('click', () => {
-    const curr = document.documentElement.getAttribute('data-theme');
-    const next = curr === 'light' ? 'dark' : 'light';
-    document.documentElement.setAttribute('data-theme', next);
-    localStorage.setItem('wc_theme', next);
-    updateThemeIcon(next);
-  });
-  updateThemeIcon(document.documentElement.getAttribute('data-theme'));
-
   // Time override — Apply
   document.getElementById('applyOverride').addEventListener('click', () => {
     const input = document.getElementById('overrideInput').value;
@@ -63,12 +51,12 @@ function setupEventListeners() {
     renderAllCities();
   });
 
-  // Time override — Enter key
+  // Time override — Enter
   document.getElementById('overrideInput').addEventListener('keydown', (e) => {
     if (e.key === 'Enter') document.getElementById('applyOverride').click();
   });
 
-  // Time override — Reset buttons
+  // Reset buttons
   document.getElementById('clearOverride').addEventListener('click', resetOverride);
   document.getElementById('resetOverride').addEventListener('click', resetOverride);
 
@@ -97,7 +85,7 @@ function setupEventListeners() {
     renderPickerList(e.target.value.toLowerCase());
   });
 
-  // ESC untuk close modal
+  // ESC close modal
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape' && !document.getElementById('pickerModal').hidden) {
       closePicker();
@@ -122,11 +110,7 @@ function showOverrideBadge(label) {
   badge.firstChild.textContent = `⏱ ${label} `;
 }
 
-function updateThemeIcon(theme) {
-  document.getElementById('themeToggle').textContent = theme === 'light' ? '☀️' : '🌙';
-}
-
-// ===== RENDER PINNED (3 UTAMA) =====
+// ===== RENDER PINNED =====
 function renderPinned() {
   const grid = document.getElementById('pinnedGrid');
   const now = getNow();
@@ -163,9 +147,11 @@ function renderPinned() {
     grid.appendChild(card);
   });
 
-  // Bind change buttons
   grid.querySelectorAll('.change-btn').forEach(btn => {
-    btn.addEventListener('click', () => openPicker(parseInt(btn.dataset.slot)));
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      openPicker(parseInt(btn.dataset.slot));
+    });
   });
 }
 
@@ -186,7 +172,6 @@ function renderAllCities() {
     );
   }
 
-  // Urutkan berdasarkan offset (barat → timur)
   list = [...list].sort((a, b) =>
     getTimezoneOffsetMinutes(now, a.tz) - getTimezoneOffsetMinutes(now, b.tz)
   );
@@ -224,7 +209,6 @@ function startClock() {
 function updateClocks() {
   const now = getNow();
 
-  // Update pinned
   pinnedIds.forEach((id, index) => {
     const city = CITIES.find(c => c.id === id);
     if (!city) return;
@@ -245,7 +229,6 @@ function updateClocks() {
     }
   });
 
-  // Update all cities
   document.querySelectorAll('[data-city-time]').forEach(clockEl => {
     const id = clockEl.dataset.cityTime;
     const city = CITIES.find(c => c.id === id);
