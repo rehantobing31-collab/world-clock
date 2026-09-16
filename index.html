@@ -6,21 +6,17 @@
   <meta name="description" content="World Clock — Live time across the globe with time travel feature" />
   <title>🌍 World Clock — Live Time</title>
 
-  <!-- Favicon -->
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌍</text></svg>" />
 
-  <!-- Google Fonts: Inter + JetBrains Mono -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
-  <!-- Stylesheet -->
   <link rel="stylesheet" href="css/style.css" />
 </head>
 <body>
   <div class="app">
 
-    <!-- ============ HEADER ============ -->
     <header class="header">
       <div class="header-left">
         <h1 class="logo">🌍 World Clock</h1>
@@ -32,7 +28,6 @@
           <button id="resetOverride" title="Reset">✕</button>
         </div>
 
-        <!-- Theme switcher -->
         <div class="theme-switcher" id="themeSwitcher">
           <button class="theme-btn" id="themeBtn" title="Ganti tema">
             <span id="themeIcon">🌙</span>
@@ -44,11 +39,14 @@
             <button class="theme-option" data-theme="light">
               <span class="swatch" data-swatch="light"></span> Light
             </button>
+            <button class="theme-option" data-theme="ocean">
+              <span class="swatch" data-swatch="ocean"></span> Ocean
+            </button>
+            <button class="theme-option" data-theme="forest">
+              <span class="swatch" data-swatch="forest"></span> Forest
+            </button>
             <button class="theme-option" data-theme="nord">
               <span class="swatch" data-swatch="nord"></span> Nord
-            </button>
-            <button class="theme-option" data-theme="solarized">
-              <span class="swatch" data-swatch="solarized"></span> Solarized
             </button>
             <button class="theme-option" data-theme="sepia">
               <span class="swatch" data-swatch="sepia"></span> Sepia
@@ -58,7 +56,6 @@
       </div>
     </header>
 
-    <!-- ============ TIME OVERRIDE PANEL ============ -->
     <section class="override-panel">
       <div class="override-input-group">
         <label for="overrideInput">⏰ Set Waktu (Time Travel)</label>
@@ -78,13 +75,11 @@
       </div>
     </section>
 
-    <!-- ============ PINNED CLOCKS (3 UTAMA) ============ -->
     <section class="pinned-section">
       <h2 class="section-title">⭐ Waktu Utama</h2>
       <div class="pinned-grid" id="pinnedGrid"></div>
     </section>
 
-    <!-- ============ ALL CLOCKS ============ -->
     <section class="all-section">
       <div class="section-header">
         <h2 class="section-title">🌐 Semua Kota</h2>
@@ -103,7 +98,6 @@
       <div class="all-grid" id="allGrid"></div>
     </section>
 
-    <!-- ============ PICKER MODAL ============ -->
     <div class="modal" id="pickerModal" hidden>
       <div class="modal-content">
         <div class="modal-header">
@@ -115,13 +109,11 @@
       </div>
     </div>
 
-    <!-- ============ FOOTER ============ -->
     <footer class="footer">
       <p>Dibuat dengan ❤️ — Waktu mengikuti timezone IANA resmi</p>
     </footer>
   </div>
 
-  <!-- Scripts (urutan PENTING) -->
   <script src="js/cities.js"></script>
   <script src="js/clock.js"></script>
   <script src="js/theme.js"></script>
