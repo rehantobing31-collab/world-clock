@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="World Clock — Live time across the globe with time travel feature" />
+  <title>🌍 World Clock — Live Time</title>
+
+  <!-- Favicon (emoji) -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌍</text></svg>" />
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Stylesheet -->
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <div class="app">
+
+    <!-- ============ HEADER ============ -->
+    <header class="header">
+      <div class="header-left">
+        <h1 class="logo">🌍 World Clock</h1>
+        <p class="subtitle">Live time across the globe</p>
+      </div>
+      <div class="header-right">
+        <div class="override-badge" id="overrideBadge" hidden>
+          ⏱ Time Travel Aktif
+          <button id="resetOverride" title="Reset">✕</button>
+        </div>
+        <button id="themeToggle" class="icon-btn" title="Toggle theme">🌙</button>
+      </div>
+    </header>
+
+    <!-- ============ TIME OVERRIDE PANEL ============ -->
+    <section class="override-panel">
+      <div class="override-input-group">
+        <label for="overrideInput">⏰ Set Waktu (Time Travel)</label>
+        <div class="input-row">
+          <input
+            type="text"
+            id="overrideInput"
+            placeholder="contoh: 20:15 WIB  /  14:30 UTC  /  09:00 Tokyo"
+            autocomplete="off"
+          />
+          <button id="applyOverride" class="btn-primary">Terapkan</button>
+          <button id="clearOverride" class="btn-ghost">Reset</button>
+        </div>
+        <p class="hint" id="overrideHint">
+          Format: <code>HH:MM ZONA</code> — zona bisa: WIB, WITA, WIT, UTC, GMT, atau nama kota (Tokyo, London, dll.)
+        </p>
+      </div>
+    </section>
+
+    <!-- ============ PINNED CLOCKS (3 UTAMA) ============ -->
+    <section class="pinned-section">
+      <h2 class="section-title">⭐ Waktu Utama</h2>
+      <div class="pinned-grid" id="pinnedGrid"></div>
+    </section>
+
+    <!-- ============ ALL CLOCKS ============ -->
+    <section class="all-section">
+      <div class="section-header">
+        <h2 class="section-title">🌐 Semua Kota</h2>
+        <div class="search-box">
+          <input type="text" id="searchInput" placeholder="Cari kota / negara..." />
+        </div>
+      </div>
+      <div class="filter-tabs" id="filterTabs">
+        <button class="tab active" data-region="all">Semua</button>
+        <button class="tab" data-region="Asia">Asia</button>
+        <button class="tab" data-region="Europe">Eropa</button>
+        <button class="tab" data-region="America">Amerika</button>
+        <button class="tab" data-region="Oceania">Oceania</button>
+        <button class="tab" data-region="Africa">Afrika</button>
+      </div>
+      <div class="all-grid" id="allGrid"></div>
+    </section>
+
+    <!-- ============ PICKER MODAL ============ -->
+    <div class="modal" id="pickerModal" hidden>
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>Pilih Kota untuk Slot <span id="slotNumber"></span></h3>
+          <button class="modal-close" id="closePicker">✕</button>
+        </div>
+        <input type="text" id="pickerSearch" placeholder="Cari kota..." />
+        <div class="picker-list" id="pickerList"></div>
+      </div>
+    </div>
+
+    <!-- ============ FOOTER ============ -->
+    <footer class="footer">
+      <p>Dibuat dengan ❤️ — Waktu mengikuti timezone IANA resmi</p>
+    </footer>
+  </div>
+
+  <!-- Scripts (urutan PENTING) -->
+  <script src="js/cities.js"></script>
+  <script src="js/clock.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
