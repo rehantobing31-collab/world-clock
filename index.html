@@ -6,13 +6,13 @@
   <meta name="description" content="World Clock — Live time across the globe with time travel feature" />
   <title>🌍 World Clock — Live Time</title>
 
-  <!-- Favicon (emoji) -->
+  <!-- Favicon -->
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌍</text></svg>" />
 
-  <!-- Google Fonts -->
+  <!-- Google Fonts: Inter + JetBrains Mono -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700;800&display=swap" rel="stylesheet">
 
   <!-- Stylesheet -->
   <link rel="stylesheet" href="css/style.css" />
@@ -31,7 +31,30 @@
           ⏱ Time Travel Aktif
           <button id="resetOverride" title="Reset">✕</button>
         </div>
-        <button id="themeToggle" class="icon-btn" title="Toggle theme">🌙</button>
+
+        <!-- Theme switcher -->
+        <div class="theme-switcher" id="themeSwitcher">
+          <button class="theme-btn" id="themeBtn" title="Ganti tema">
+            <span id="themeIcon">🌙</span>
+          </button>
+          <div class="theme-menu" id="themeMenu" hidden>
+            <button class="theme-option" data-theme="midnight">
+              <span class="swatch" data-swatch="midnight"></span> Midnight
+            </button>
+            <button class="theme-option" data-theme="light">
+              <span class="swatch" data-swatch="light"></span> Light
+            </button>
+            <button class="theme-option" data-theme="nord">
+              <span class="swatch" data-swatch="nord"></span> Nord
+            </button>
+            <button class="theme-option" data-theme="solarized">
+              <span class="swatch" data-swatch="solarized"></span> Solarized
+            </button>
+            <button class="theme-option" data-theme="sepia">
+              <span class="swatch" data-swatch="sepia"></span> Sepia
+            </button>
+          </div>
+        </div>
       </div>
     </header>
 
@@ -101,6 +124,7 @@
   <!-- Scripts (urutan PENTING) -->
   <script src="js/cities.js"></script>
   <script src="js/clock.js"></script>
+  <script src="js/theme.js"></script>
   <script src="js/app.js"></script>
 </body>
 </html>
