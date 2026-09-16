@@ -56,86 +56,48 @@ function applyTheme(theme) {
 }
 
 // ============================================
-// ANTI-COPY PROTECTION
+// ANTI-COPY (basic)
 // ============================================
 function initAntiCopy() {
-  // Aktifkan disable select
   document.body.classList.add('no-select');
 
-  // Block klik kanan
   document.addEventListener('contextmenu', (e) => {
     e.preventDefault();
     return false;
   });
 
-  // Block shortcut copy/view-source/inspect
   document.addEventListener('keydown', (e) => {
-    // F12
-    if (e.key === 'F12') {
-      e.preventDefault();
-      return false;
-    }
+    if (e.key === 'F12') { e.preventDefault(); return false; }
 
-    // Ctrl+Shift+I / J / C (DevTools)
     if (e.ctrlKey && e.shiftKey && ['I', 'J', 'C'].includes(e.key.toUpperCase())) {
       e.preventDefault();
       return false;
     }
 
-    // Ctrl+U (View Source)
-    if (e.ctrlKey && e.key.toUpperCase() === 'U') {
-      e.preventDefault();
-      return false;
-    }
+    if (e.ctrlKey && e.key.toUpperCase() === 'U') { e.preventDefault(); return false; }
+    if (e.ctrlKey && e.key.toUpperCase() === 'S') { e.preventDefault(); return false; }
 
-    // Ctrl+S (Save Page)
-    if (e.ctrlKey && e.key.toUpperCase() === 'S') {
-      e.preventDefault();
-      return false;
-    }
-
-    // Ctrl+A (Select All)
     if (e.ctrlKey && e.key.toUpperCase() === 'A') {
-      // Kecuali di input/textarea
       const tag = document.activeElement.tagName;
-      if (tag !== 'INPUT' && tag !== 'TEXTAREA') {
-        e.preventDefault();
-        return false;
-      }
+      if (tag !== 'INPUT' && tag !== 'TEXTAREA') { e.preventDefault(); return false; }
     }
 
-    // Ctrl+C / Ctrl+X (Copy / Cut) — kecuali di input
     if (e.ctrlKey && ['C', 'X'].includes(e.key.toUpperCase())) {
       const tag = document.activeElement.tagName;
-      if (tag !== 'INPUT' && tag !== 'TEXTAREA') {
-        e.preventDefault();
-        return false;
-      }
+      if (tag !== 'INPUT' && tag !== 'TEXTAREA') { e.preventDefault(); return false; }
     }
   });
 
-  // Block drag (biar nggak bisa drag gambar/teks)
   document.addEventListener('dragstart', (e) => {
     const tag = document.activeElement.tagName;
-    if (tag !== 'INPUT' && tag !== 'TEXTAREA') {
-      e.preventDefault();
-    }
+    if (tag !== 'INPUT' && tag !== 'TEXTAREA') e.preventDefault();
   });
 
-  // Block copy via event (extra layer)
   document.addEventListener('copy', (e) => {
     const tag = document.activeElement.tagName;
     if (tag !== 'INPUT' && tag !== 'TEXTAREA') {
       e.preventDefault();
-      e.clipboardData.setData('text/plain', '© World Clock — Kode dilindungi');
-    }
-  });
-
-  // Block cut
-  document.addEventListener('cut', (e) => {
-    const tag = document.activeElement.tagName;
-    if (tag !== 'INPUT' && tag !== 'TEXTAREA') {
-      e.preventDefault();
+      e.clipboardData.setData('text/plain', '© World Clock');
     }
   });
 }
