@@ -10,11 +10,28 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
 
   <link rel="stylesheet" href="css/style.css" />
 </head>
 <body>
+
+  <!-- ============ WIDGET BAR (sticky di atas) ============ -->
+  <div class="widget-bar" id="widgetBar" hidden>
+    <div class="widget-content" id="widgetContent">
+      <!-- Diisi oleh JS -->
+    </div>
+    <div class="widget-actions">
+      <button class="widget-btn" id="widgetAddBtn" title="Tambah kota">+</button>
+      <button class="widget-btn" id="widgetCloseBtn" title="Sembunyikan">✕</button>
+    </div>
+  </div>
+
+  <!-- Tombol kecil kalau widget disembunyikan -->
+  <button class="widget-show-btn" id="widgetShowBtn" title="Tampilkan widget" hidden>
+    📌
+  </button>
+
   <div class="app">
 
     <header class="header">
@@ -109,6 +126,18 @@
       </div>
     </div>
 
+    <!-- Modal khusus widget -->
+    <div class="modal" id="widgetPickerModal" hidden>
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>Tambahkan Kota ke Widget</h3>
+          <button class="modal-close" id="closeWidgetPicker">✕</button>
+        </div>
+        <input type="text" id="widgetPickerSearch" placeholder="Cari kota..." />
+        <div class="picker-list" id="widgetPickerList"></div>
+      </div>
+    </div>
+
     <footer class="footer">
       <p>Dibuat dengan ❤️ — Waktu mengikuti timezone IANA resmi</p>
     </footer>
@@ -117,6 +146,7 @@
   <script src="js/cities.js"></script>
   <script src="js/clock.js"></script>
   <script src="js/theme.js"></script>
+  <script src="js/widget.js"></script>
   <script src="js/app.js"></script>
 </body>
 </html>
