@@ -1,275 +1,242 @@
 // ============================================
-// WORLD CLOCK — Logic UI
+// WORLD CLOCK — Widget Bar (sticky di atas)
 // ============================================
 
-const DEFAULT_PINNED = ['jakarta', 'singapore', 'colombo'];
-let pinnedIds = [...DEFAULT_PINNED];
-let activeRegion = 'all';
-let searchQuery = '';
-let editingSlot = null;
+// State widget
+let widgetCities = [];        // array of city id yang tampil di widget
+let widgetHidden = false;     // true = widget disembunyikan
+let activeWidgetCity = null;  // city id yang jadi "aktif" (di-klik dari kartu pinned)
 
 // ===== INIT =====
-document.addEventListener('DOMContentLoaded', () => {
-  loadState();
-  initTheme();
-  initAntiCopy();
-  initWidget();
-  setupEventListeners();
-  renderPinned();
-  renderAllCities();
-  highlightPinnedActive();
-  startClock();
-});
+function initWidget() {
+  loadWidgetState();
 
-// ===== STATE PERSIST =====
-function loadState() {
-  try {
-    const savedPinned = JSON.parse(localStorage.getItem('wc_pinned') || 'null');
-    if (Array.isArray(savedPinned) && savedPinned.length === 3) {
-      pinnedIds = savedPinned;
-    }
-  } catch (e) { /* ignore */ }
-}
-
-function savePinned() {
-  localStorage.setItem('wc_pinned', JSON.stringify(pinnedIds));
-}
-
-// ===== EVENT LISTENERS =====
-function setupEventListeners() {
-  document.getElementById('applyOverride').addEventListener('click', () => {
-    const input = document.getElementById('overrideInput').value;
-    const result = applyTimeOverride(input);
-    const hint = document.getElementById('overrideHint');
-    if (!result.ok) {
-      hint.style.color = 'var(--danger)';
-      hint.textContent = '❌ Format tidak valid. Contoh: 20:15 WIB, 14:30 UTC, 09:00 Tokyo';
-      return;
-    }
-    hint.style.color = 'var(--success)';
-    hint.textContent = `✅ Time travel aktif ke ${result.target.toLocaleString('id-ID')}`;
-    showOverrideBadge(input.trim());
-    renderPinned();
-    renderAllCities();
+  // Event: tombol close
+  document.getElementById('widgetCloseBtn').addEventListener('click', () => {
+    widgetHidden = true;
+    saveWidgetState();
     renderWidget();
   });
 
-  document.getElementById('overrideInput').addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') document.getElementById('applyOverride').click();
+  // Event: tombol show (yang nempel di kanan atas)
+  document.getElementById('widgetShowBtn').addEventListener('click', () => {
+    widgetHidden = false;
+    saveWidgetState();
+    renderWidget();
   });
 
-  document.getElementById('clearOverride').addEventListener('click', resetOverride);
-  document.getElementById('resetOverride').addEventListener('click', resetOverride);
+  // Event: tombol tambah kota
+  document.getElementById('widgetAddBtn').addEventListener('click', openWidgetPicker);
 
-  document.getElementById('searchInput').addEventListener('input', (e) => {
-    searchQuery = e.target.value.toLowerCase();
-    renderAllCities();
+  // Modal widget picker
+  document.getElementById('closeWidgetPicker').addEventListener('click', closeWidgetPicker);
+  document.getElementById('widgetPickerModal').addEventListener('click', (e) => {
+    if (e.target.id === 'widgetPickerModal') closeWidgetPicker();
+  });
+  document.getElementById('widgetPickerSearch').addEventListener('input', (e) => {
+    renderWidgetPickerList(e.target.value.toLowerCase());
   });
 
-  document.querySelectorAll('.tab').forEach(tab => {
-    tab.addEventListener('click', () => {
-      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-      tab.classList.add('active');
-      activeRegion = tab.dataset.region;
-      renderAllCities();
-    });
-  });
-
-  document.getElementById('closePicker').addEventListener('click', closePicker);
-  document.getElementById('pickerModal').addEventListener('click', (e) => {
-    if (e.target.id === 'pickerModal') closePicker();
-  });
-  document.getElementById('pickerSearch').addEventListener('input', (e) => {
-    renderPickerList(e.target.value.toLowerCase());
-  });
-
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') {
-      if (!document.getElementById('pickerModal').hidden) closePicker();
-      if (!document.getElementById('widgetPickerModal').hidden) closeWidgetPicker();
-    }
-  });
-}
-
-function resetOverride() {
-  clearTimeOverride();
-  document.getElementById('overrideInput').value = '';
-  const hint = document.getElementById('overrideHint');
-  hint.style.color = '';
-  hint.innerHTML = 'Format: <code>HH:MM ZONA</code> — zona bisa: WIB, WITA, WIT, UTC, GMT, atau nama kota (Tokyo, London, dll.)';
-  document.getElementById('overrideBadge').hidden = true;
-  renderPinned();
-  renderAllCities();
   renderWidget();
 }
 
-function showOverrideBadge(label) {
-  const badge = document.getElementById('overrideBadge');
-  badge.hidden = false;
-  badge.firstChild.textContent = `⏱ ${label} `;
+// ===== PERSIST =====
+function loadWidgetState() {
+  try {
+    const saved = JSON.parse(localStorage.getItem('wc_widget') || 'null');
+    if (saved) {
+      widgetCities = Array.isArray(saved.cities) ? saved.cities : [];
+      widgetHidden = !!saved.hidden;
+      activeWidgetCity = saved.active || null;
+    }
+    // Default: kalau kosong, ikutin pinned
+    if (widgetCities.length === 0) {
+      widgetCities = [...pinnedIds];
+      activeWidgetCity = pinnedIds[0] || null;
+    }
+  } catch (e) {
+    widgetCities = [...pinnedIds];
+    activeWidgetCity = pinnedIds[0] || null;
+  }
 }
 
-// ===== RENDER PINNED =====
-function renderPinned() {
-  const grid = document.getElementById('pinnedGrid');
+function saveWidgetState() {
+  localStorage.setItem('wc_widget', JSON.stringify({
+    cities: widgetCities,
+    hidden: widgetHidden,
+    active: activeWidgetCity,
+  }));
+}
+
+// ===== RENDER =====
+function renderWidget() {
+  const bar = document.getElementById('widgetBar');
+  const showBtn = document.getElementById('widgetShowBtn');
+  const content = document.getElementById('widgetContent');
+
+  // Kalau widget disembunyikan
+  if (widgetHidden) {
+    bar.hidden = true;
+    showBtn.hidden = false;
+    return;
+  }
+
+  bar.hidden = false;
+  showBtn.hidden = true;
+
+  if (widgetCities.length === 0) {
+    content.innerHTML = `<span style="color:var(--text-dim);font-size:0.85rem;padding:6px 0;">Belum ada kota. Klik + untuk tambah.</span>`;
+    return;
+  }
+
   const now = getNow();
-  grid.innerHTML = '';
+  content.innerHTML = '';
 
-  pinnedIds.forEach((id, index) => {
-    const city = CITIES.find(c => c.id === id);
+  widgetCities.forEach(cityId => {
+    const city = CITIES.find(c => c.id === cityId);
     if (!city) return;
-    const time = formatTime(now, city.tz);
-    const date = formatDate(now, city.tz);
-    const offset = formatOffsetLabel(now, city.tz);
 
-    const card = document.createElement('div');
-    card.className = 'pinned-card';
-    card.dataset.pinnedIndex = index;
-    card.dataset.pinnedCity = city.id;
-    card.innerHTML = `
-      <div class="pinned-header">
-        <div class="pinned-city">
-          <span class="pinned-flag">${city.flag}</span>
-          <div>
-            <div class="pinned-name">${city.city}</div>
-            <div class="pinned-country">${city.country}</div>
-          </div>
-        </div>
-        <button class="change-btn" data-slot="${index}">Ganti</button>
-      </div>
-      <div class="digital-clock" data-pinned-time="${index}">
-        <span class="hm">${time.hour}:${time.minute}</span><span class="seconds">:${time.second}</span>
-      </div>
-      <div class="date-line">
-        <span>${date}</span>
-        <span class="tz-badge">${offset}</span>
-      </div>
+    const time = formatTime(now, city.tz);
+    const isActive = cityId === activeWidgetCity;
+
+    const item = document.createElement('div');
+    item.className = 'widget-clock-item' + (isActive ? ' is-active' : '');
+    item.dataset.widgetCity = cityId;
+    item.innerHTML = `
+      <span class="w-icon">${city.flag}</span>
+      <span class="w-time" data-widget-time="${cityId}">
+        ${time.hour}:${time.minute}<span class="w-sec">:${time.second}</span>
+      </span>
+      <span class="w-tz">${getShortTzLabel(city.tz)}</span>
+      <button class="w-remove" data-widget-remove="${cityId}" title="Hapus">✕</button>
     `;
 
-    // Klik kartu → set aktif di widget
-    card.addEventListener('click', (e) => {
-      if (e.target.classList.contains('change-btn') || e.target.closest('.change-btn')) return;
-      setActiveWidgetCity(city.id);
+    // Klik item → set aktif
+    item.addEventListener('click', (e) => {
+      if (e.target.dataset.widgetRemove) return;
+      activeWidgetCity = cityId;
+      saveWidgetState();
+      renderWidget();
+      highlightPinnedActive();
     });
 
-    grid.appendChild(card);
+    content.appendChild(item);
   });
 
-  grid.querySelectorAll('.change-btn').forEach(btn => {
+  // Bind remove buttons
+  content.querySelectorAll('[data-widget-remove]').forEach(btn => {
     btn.addEventListener('click', (e) => {
       e.stopPropagation();
-      openPicker(parseInt(btn.dataset.slot));
+      const id = btn.dataset.widgetRemove;
+      widgetCities = widgetCities.filter(c => c !== id);
+      if (activeWidgetCity === id) {
+        activeWidgetCity = widgetCities[0] || null;
+      }
+      saveWidgetState();
+      renderWidget();
+      highlightPinnedActive();
     });
   });
 }
 
-// ===== RENDER ALL CITIES =====
-function renderAllCities() {
-  const grid = document.getElementById('allGrid');
+// ===== UPDATE PER DETIK =====
+function updateWidgetClocks() {
+  if (widgetHidden) return;
   const now = getNow();
-  let list = CITIES;
-
-  if (activeRegion !== 'all') {
-    list = list.filter(c => c.region === activeRegion);
-  }
-  if (searchQuery) {
-    list = list.filter(c =>
-      c.city.toLowerCase().includes(searchQuery) ||
-      c.country.toLowerCase().includes(searchQuery) ||
-      c.tz.toLowerCase().includes(searchQuery)
-    );
-  }
-
-  list = [...list].sort((a, b) =>
-    getTimezoneOffsetMinutes(now, a.tz) - getTimezoneOffsetMinutes(now, b.tz)
-  );
-
-  grid.innerHTML = '';
-  list.forEach(city => {
-    const time = formatTime(now, city.tz);
-    const date = formatDate(now, city.tz);
-
-    const card = document.createElement('div');
-    card.className = 'city-card';
-    card.innerHTML = `
-      <div class="city-card-header">
-        <span class="city-flag">${city.flag}</span>
-        <div style="flex:1;margin-left:10px;">
-          <div class="city-name">${city.city}</div>
-          <div class="city-country">${city.country}</div>
-        </div>
-      </div>
-      <div class="city-clock" data-city-time="${city.id}">
-        ${time.hour}:${time.minute}<span class="seconds">:${time.second}</span>
-      </div>
-      <div class="city-date">${date}</div>
-    `;
-    grid.appendChild(card);
-  });
-}
-
-// ===== CLOCK TICK =====
-function startClock() {
-  updateClocks();
-  setInterval(updateClocks, 1000);
-}
-
-function updateClocks() {
-  const now = getNow();
-
-  pinnedIds.forEach((id, index) => {
-    const city = CITIES.find(c => c.id === id);
+  document.querySelectorAll('[data-widget-time]').forEach(el => {
+    const cityId = el.dataset.widgetTime;
+    const city = CITIES.find(c => c.id === cityId);
     if (!city) return;
     const time = formatTime(now, city.tz);
-    const date = formatDate(now, city.tz);
-    const offset = formatOffsetLabel(now, city.tz);
-
-    const clockEl = document.querySelector(`[data-pinned-time="${index}"]`);
-    if (clockEl) {
-      clockEl.innerHTML = `<span class="hm">${time.hour}:${time.minute}</span><span class="seconds">:${time.second}</span>`;
-    }
-    const card = clockEl?.closest('.pinned-card');
-    if (card) {
-      const dateLine = card.querySelector('.date-line');
-      if (dateLine) {
-        dateLine.innerHTML = `<span>${date}</span><span class="tz-badge">${offset}</span>`;
-      }
-    }
+    el.innerHTML = `${time.hour}:${time.minute}<span class="w-sec">:${time.second}</span>`;
   });
+}
 
-  document.querySelectorAll('[data-city-time]').forEach(clockEl => {
-    const id = clockEl.dataset.cityTime;
-    const city = CITIES.find(c => c.id === id);
-    if (!city) return;
-    const time = formatTime(now, city.tz);
-    const date = formatDate(now, city.tz);
-    clockEl.innerHTML = `${time.hour}:${time.minute}<span class="seconds">:${time.second}</span>`;
-    const dateEl = clockEl.nextElementSibling;
-    if (dateEl && dateEl.classList.contains('city-date')) {
-      dateEl.textContent = date;
-    }
+// ===== SHORT TZ LABEL =====
+function getShortTzLabel(tz) {
+  const map = {
+    'Asia/Jakarta': 'WIB',
+    'Asia/Makassar': 'WITA',
+    'Asia/Jayapura': 'WIT',
+    'Asia/Singapore': 'SGT',
+    'Asia/Tokyo': 'JST',
+    'Asia/Seoul': 'KST',
+    'Asia/Shanghai': 'CST',
+    'Asia/Hong_Kong': 'HKT',
+    'Asia/Bangkok': 'ICT',
+    'Asia/Ho_Chi_Minh': 'ICT',
+    'Asia/Kuala_Lumpur': 'MYT',
+    'Asia/Manila': 'PHT',
+    'Asia/Kolkata': 'IST',
+    'Asia/Dhaka': 'BST',
+    'Asia/Colombo': 'IST',
+    'Asia/Kathmandu': 'NPT',
+    'Asia/Dubai': 'GST',
+    'Asia/Riyadh': 'AST',
+    'Asia/Tehran': 'IRST',
+    'Europe/London': 'GMT',
+    'Europe/Paris': 'CET',
+    'Europe/Berlin': 'CET',
+    'Europe/Madrid': 'CET',
+    'Europe/Rome': 'CET',
+    'Europe/Amsterdam': 'CET',
+    'Europe/Moscow': 'MSK',
+    'Europe/Istanbul': 'TRT',
+    'Europe/Athens': 'EET',
+    'Europe/Stockholm': 'CET',
+    'Europe/Zurich': 'CET',
+    'Europe/Lisbon': 'WET',
+    'America/New_York': 'EST',
+    'America/Los_Angeles': 'PST',
+    'America/Chicago': 'CST',
+    'America/Denver': 'MST',
+    'America/Toronto': 'EST',
+    'America/Vancouver': 'PST',
+    'America/Mexico_City': 'CST',
+    'America/Sao_Paulo': 'BRT',
+    'America/Argentina/Buenos_Aires': 'ART',
+    'America/Lima': 'PET',
+    'America/Bogota': 'COT',
+    'America/Santiago': 'CLT',
+    'Australia/Sydney': 'AEST',
+    'Australia/Melbourne': 'AEST',
+    'Australia/Perth': 'AWST',
+    'Pacific/Auckland': 'NZST',
+    'Pacific/Fiji': 'FJT',
+    'Africa/Cairo': 'EET',
+    'Africa/Johannesburg': 'SAST',
+    'Africa/Lagos': 'WAT',
+    'Africa/Nairobi': 'EAT',
+    'Africa/Casablanca': 'WET',
+    'Africa/Addis_Ababa': 'EAT',
+    'UTC': 'UTC',
+  };
+  return map[tz] || tz.split('/').pop().slice(0, 4).toUpperCase();
+}
+
+// ===== HIGHLIGHT PINNED YANG AKTIF =====
+function highlightPinnedActive() {
+  document.querySelectorAll('.pinned-card').forEach(card => {
+    const idx = card.dataset.pinnedIndex;
+    if (idx === undefined) return;
+    const cityId = pinnedIds[parseInt(idx)];
+    card.classList.toggle('active', cityId === activeWidgetCity);
   });
-
-  // Update widget juga
-  updateWidgetClocks();
 }
 
-// ===== PICKER MODAL =====
-function openPicker(slotIndex) {
-  editingSlot = slotIndex;
-  document.getElementById('slotNumber').textContent = slotIndex + 1;
-  document.getElementById('pickerSearch').value = '';
-  renderPickerList('');
-  document.getElementById('pickerModal').hidden = false;
+// ===== WIDGET PICKER (tambah kota) =====
+function openWidgetPicker() {
+  document.getElementById('widgetPickerSearch').value = '';
+  renderWidgetPickerList('');
+  document.getElementById('widgetPickerModal').hidden = false;
 }
 
-function closePicker() {
-  document.getElementById('pickerModal').hidden = true;
-  editingSlot = null;
+function closeWidgetPicker() {
+  document.getElementById('widgetPickerModal').hidden = true;
 }
 
-function renderPickerList(query) {
-  const list = document.getElementById('pickerList');
+function renderWidgetPickerList(query) {
+  const list = document.getElementById('widgetPickerList');
   let filtered = CITIES;
   if (query) {
     filtered = filtered.filter(c =>
@@ -277,34 +244,55 @@ function renderPickerList(query) {
       c.country.toLowerCase().includes(query)
     );
   }
+
+  // Sort: yang belum ada di widget dulu
+  filtered = [...filtered].sort((a, b) => {
+    const aIn = widgetCities.includes(a.id) ? 1 : 0;
+    const bIn = widgetCities.includes(b.id) ? 1 : 0;
+    return aIn - bIn;
+  });
+
   list.innerHTML = '';
   filtered.forEach(city => {
+    const isIn = widgetCities.includes(city.id);
     const item = document.createElement('div');
     item.className = 'picker-item';
+    item.style.opacity = isIn ? '0.5' : '1';
     item.innerHTML = `
       <span class="flag">${city.flag}</span>
-      <div>
-        <div class="name">${city.city}</div>
-        <div class="country">${city.country} · ${city.tz}</div>
+      <div style="flex:1;">
+        <div class="name">${city.city} ${isIn ? '✓' : ''}</div>
+        <div class="country">${city.country} · ${getShortTzLabel(city.tz)}</div>
       </div>
     `;
     item.addEventListener('click', () => {
-      if (editingSlot !== null) {
-        const oldId = pinnedIds[editingSlot];
-        pinnedIds[editingSlot] = city.id;
-        savePinned();
-
-        // Update widget juga
-        widgetCities = widgetCities.map(c => c === oldId ? city.id : c);
-        if (activeWidgetCity === oldId) activeWidgetCity = city.id;
-        saveWidgetState();
-
-        renderPinned();
-        renderWidget();
-        highlightPinnedActive();
-        closePicker();
+      if (isIn) {
+        // Toggle off
+        widgetCities = widgetCities.filter(c => c !== city.id);
+        if (activeWidgetCity === city.id) {
+          activeWidgetCity = widgetCities[0] || null;
+        }
+      } else {
+        // Toggle on
+        widgetCities.push(city.id);
+        if (!activeWidgetCity) activeWidgetCity = city.id;
       }
+      saveWidgetState();
+      renderWidget();
+      renderWidgetPickerList(query);
+      highlightPinnedActive();
     });
     list.appendChild(item);
   });
+}
+
+// ===== SET ACTIVE DARI LUAR =====
+function setActiveWidgetCity(cityId) {
+  if (!widgetCities.includes(cityId)) {
+    widgetCities.push(cityId);
+  }
+  activeWidgetCity = cityId;
+  saveWidgetState();
+  renderWidget();
+  highlightPinnedActive();
 }
