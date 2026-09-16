@@ -12,6 +12,7 @@ let editingSlot = null;
 document.addEventListener('DOMContentLoaded', () => {
   loadState();
   initTheme();
+  initAntiCopy();          // ← Anti-copy aktif
   setupEventListeners();
   renderPinned();
   renderAllCities();
@@ -34,7 +35,6 @@ function savePinned() {
 
 // ===== EVENT LISTENERS =====
 function setupEventListeners() {
-  // Time override — Apply
   document.getElementById('applyOverride').addEventListener('click', () => {
     const input = document.getElementById('overrideInput').value;
     const result = applyTimeOverride(input);
@@ -51,22 +51,18 @@ function setupEventListeners() {
     renderAllCities();
   });
 
-  // Time override — Enter
   document.getElementById('overrideInput').addEventListener('keydown', (e) => {
     if (e.key === 'Enter') document.getElementById('applyOverride').click();
   });
 
-  // Reset buttons
   document.getElementById('clearOverride').addEventListener('click', resetOverride);
   document.getElementById('resetOverride').addEventListener('click', resetOverride);
 
-  // Search
   document.getElementById('searchInput').addEventListener('input', (e) => {
     searchQuery = e.target.value.toLowerCase();
     renderAllCities();
   });
 
-  // Filter tabs
   document.querySelectorAll('.tab').forEach(tab => {
     tab.addEventListener('click', () => {
       document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
@@ -76,7 +72,6 @@ function setupEventListeners() {
     });
   });
 
-  // Picker modal
   document.getElementById('closePicker').addEventListener('click', closePicker);
   document.getElementById('pickerModal').addEventListener('click', (e) => {
     if (e.target.id === 'pickerModal') closePicker();
@@ -85,7 +80,6 @@ function setupEventListeners() {
     renderPickerList(e.target.value.toLowerCase());
   });
 
-  // ESC close modal
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape' && !document.getElementById('pickerModal').hidden) {
       closePicker();
