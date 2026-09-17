@@ -16,7 +16,6 @@
 </head>
 <body>
 
-  <!-- WIDGET BAR -->
   <div class="widget-bar" id="widgetBar" hidden>
     <div class="widget-content" id="widgetContent"></div>
     <div class="widget-actions">
@@ -39,7 +38,6 @@
           <button id="resetOverride" title="Reset">✕</button>
         </div>
 
-        <!-- FORMAT TOGGLE (12/24 jam) -->
         <button class="format-toggle" id="formatToggle" title="Ganti format jam">24h</button>
 
         <div class="theme-switcher" id="themeSwitcher">
@@ -62,7 +60,7 @@
       <div class="override-input-group">
         <label for="overrideInput">⏰ Set Waktu (Time Travel)</label>
         <div class="input-row">
-          <input type="text" id="overrideInput" placeholder="contoh: 20:15 WIB  /  14:30 UTC  /  09:00 Tokyo" autocomplete="off" />
+          <input type="text" id="overrideInput" placeholder="contoh: 20:15 WIB  /  8:30 PM Singapore" autocomplete="off" />
           <button id="applyOverride" class="btn-primary">Terapkan</button>
           <button id="clearOverride" class="btn-ghost">Reset</button>
         </div>
@@ -126,6 +124,7 @@
   <script src="js/clock.js"></script>
   <script src="js/format.js"></script>
   <script src="js/sun.js"></script>
+  <script src="js/motion.js"></script>
   <script src="js/theme.js"></script>
   <script src="js/widget.js"></script>
   <script src="js/app.js"></script>
