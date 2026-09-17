@@ -54,20 +54,44 @@ function formatOffsetLabel(date, tz) {
   return `UTC${sign}${hh}:${mm}`;
 }
 
+// ============================================
+// PARSE TIME TRAVEL — support AM/PM juga
+// ============================================
 function parseTimeTravelInput(input) {
   if (!input || !input.trim()) return null;
   const raw = input.trim();
 
-  const m = raw.match(/^(\d{1,2})[:.](\d{2})(?:[:](\d{2}))?\s*(.*)$/i);
+  // Regex baru:
+  // Grup 1: jam (1-2 digit)
+  // Grup 2: menit (2 digit)
+  // Grup 3: detik (opsional)
+  // Grup 4: AM/PM (opsional)
+  // Grup 5: zona (sisa string)
+  const m = raw.match(/^(\d{1,2})[:.](\d{2})(?:[:](\d{2}))?\s*(am|pm|a\.m\.|p\.m\.)?\s*(.*)$/i);
   if (!m) return null;
 
-  const hh = parseInt(m[1], 10);
+  let hh = parseInt(m[1], 10);
   const mm = parseInt(m[2], 10);
   const ss = m[3] ? parseInt(m[3], 10) : 0;
-  const zoneRaw = (m[4] || '').trim().toLowerCase();
+  const ampm = (m[4] || '').toLowerCase().replace(/\./g, '');
+  const zoneRaw = (m[5] || '').trim().toLowerCase();
 
-  if (hh > 23 || mm > 59 || ss > 59) return null;
+  // Validasi
+  if (mm > 59 || ss > 59) return null;
 
+  // Handle AM/PM
+  if (ampm === 'am' || ampm === 'pm') {
+    if (hh < 1 || hh > 12) return null;
+    if (ampm === 'am') {
+      if (hh === 12) hh = 0;
+    } else {
+      if (hh !== 12) hh += 12;
+    }
+  } else {
+    if (hh > 23) return null;
+  }
+
+  // Tentukan target timezone
   let targetTz = null;
 
   if (!zoneRaw) {
@@ -88,6 +112,7 @@ function parseTimeTravelInput(input) {
     }
   }
 
+  // Hitung instant
   const now = new Date();
   const dateParts = new Intl.DateTimeFormat('en-CA', {
     timeZone: targetTz,
