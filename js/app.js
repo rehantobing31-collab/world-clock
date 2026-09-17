@@ -1,5 +1,5 @@
 // ============================================
-// WORLD CLOCK — Logic UI
+// WORLD CLOCK — Logic UI + Elegant Motion
 // ============================================
 
 const DEFAULT_PINNED = ['jakarta', 'singapore', 'colombo'];
@@ -20,6 +20,20 @@ document.addEventListener('DOMContentLoaded', () => {
   renderAllCities();
   highlightPinnedActive();
   startClock();
+
+  // Motion: stagger fade-in initial render
+  requestAnimationFrame(() => {
+    staggerFadeIn(document.getElementById('pinnedGrid'));
+    staggerFadeIn(document.getElementById('allGrid'));
+  });
+
+  // Ripple di tombol-tombol utama
+  [
+    'applyOverride', 'clearOverride', 'formatToggle', 'themeBtn'
+  ].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) attachRipple(el);
+  });
 });
 
 // ===== STATE PERSIST =====
@@ -44,7 +58,7 @@ function setupEventListeners() {
     const hint = document.getElementById('overrideHint');
     if (!result.ok) {
       hint.style.color = 'var(--danger)';
-      hint.textContent = '❌ Format tidak valid. Contoh: 20:15 WIB, 14:30 UTC, 09:00 Tokyo';
+      hint.textContent = '❌ Format tidak valid. Contoh: 20:15 WIB, 14:30 UTC, 09:00 Tokyo, 8:30 PM Singapore';
       return;
     }
     hint.style.color = 'var(--success)';
@@ -53,6 +67,10 @@ function setupEventListeners() {
     renderPinned();
     renderAllCities();
     renderWidget();
+    requestAnimationFrame(() => {
+      staggerFadeIn(document.getElementById('pinnedGrid'));
+      staggerFadeIn(document.getElementById('allGrid'));
+    });
   });
 
   document.getElementById('overrideInput').addEventListener('keydown', (e) => {
@@ -73,6 +91,7 @@ function setupEventListeners() {
       tab.classList.add('active');
       activeRegion = tab.dataset.region;
       renderAllCities();
+      requestAnimationFrame(() => staggerFadeIn(document.getElementById('allGrid')));
     });
   });
 
@@ -158,6 +177,7 @@ function renderPinned() {
       setActiveWidgetCity(city.id);
     });
 
+    attachRipple(card);
     grid.appendChild(card);
   });
 
@@ -211,6 +231,7 @@ function renderAllCities() {
       </div>
       <div class="city-date">${date}</div>
     `;
+    attachRipple(card);
     grid.appendChild(card);
   });
 }
@@ -233,7 +254,7 @@ function updateClocks() {
     const dayIcon = getDayNightIcon(dayState);
 
     const clockEl = document.querySelector(`[data-pinned-time="${index}"]`);
-    if (clockEl) clockEl.innerHTML = renderClockHTML(now, city.tz);
+    if (clockEl) updateClockElement(clockEl, now, city.tz);
 
     const card = clockEl?.closest('.pinned-card');
     if (card) {
@@ -257,7 +278,7 @@ function updateClocks() {
     const dayState = getDayNightState(city, now);
     const dayIcon = getDayNightIcon(dayState);
 
-    clockEl.innerHTML = renderClockHTML(now, city.tz);
+    updateClockElement(clockEl, now, city.tz);
 
     const card = clockEl.closest('.city-card');
     if (card) {
@@ -275,6 +296,53 @@ function updateClocks() {
   });
 
   updateWidgetClocks();
+}
+
+/**
+ * Update jam di elemen dengan animasi flip per digit (jam & detik).
+ */
+function updateClockElement(container, date, tz) {
+  const t = formatTimeDisplay(date, tz);
+
+  // Ambil elemen
+  let hmEl = container.querySelector('.hm');
+  let secEl = container.querySelector('.seconds');
+  let ampmEl = container.querySelector('.ampm');
+
+  if (!hmEl) {
+    container.innerHTML = renderClockHTML(date, tz);
+    return;
+  }
+
+  // Update jam:menit dengan flip kalau berubah
+  const oldHM = hmEl.textContent;
+  const newHM = t.main;
+  if (oldHM !== newHM) {
+    animateFlip(hmEl, newHM);
+  }
+
+  // Update detik dengan flip
+  if (secEl) {
+    const oldSec = secEl.dataset.flip;
+    const newSec = t.seconds;
+    if (oldSec !== newSec) {
+      secEl.dataset.flip = newSec;
+      if (!prefersReducedMotion()) {
+        secEl.classList.remove('flip-anim');
+        void secEl.offsetWidth;
+        secEl.classList.add('flip-anim');
+      }
+      secEl.textContent = ':' + newSec;
+    }
+  }
+
+  // Update AM/PM kalau berubah
+  if (ampmEl && t.suffix.trim()) {
+    const newAMPM = t.suffix.trim();
+    if (ampmEl.textContent !== newAMPM) {
+      ampmEl.textContent = newAMPM;
+    }
+  }
 }
 
 // ===== PICKER MODAL =====
@@ -323,8 +391,10 @@ function renderPickerList(query) {
         renderWidget();
         highlightPinnedActive();
         closePicker();
+        requestAnimationFrame(() => staggerFadeIn(document.getElementById('pinnedGrid')));
       }
     });
+    attachRipple(item);
     list.appendChild(item);
   });
 }
