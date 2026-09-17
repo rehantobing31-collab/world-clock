@@ -21,16 +21,12 @@ document.addEventListener('DOMContentLoaded', () => {
   highlightPinnedActive();
   startClock();
 
-  // Motion: stagger fade-in initial render
   requestAnimationFrame(() => {
     staggerFadeIn(document.getElementById('pinnedGrid'));
     staggerFadeIn(document.getElementById('allGrid'));
   });
 
-  // Ripple di tombol-tombol utama
-  [
-    'applyOverride', 'clearOverride', 'formatToggle', 'themeBtn'
-  ].forEach(id => {
+  ['applyOverride', 'clearOverride', 'formatToggle', 'themeBtn'].forEach(id => {
     const el = document.getElementById(id);
     if (el) attachRipple(el);
   });
@@ -299,12 +295,11 @@ function updateClocks() {
 }
 
 /**
- * Update jam di elemen dengan animasi flip per digit (jam & detik).
+ * Update jam di elemen dengan animasi flip.
  */
 function updateClockElement(container, date, tz) {
   const t = formatTimeDisplay(date, tz);
 
-  // Ambil elemen
   let hmEl = container.querySelector('.hm');
   let secEl = container.querySelector('.seconds');
   let ampmEl = container.querySelector('.ampm');
@@ -314,14 +309,12 @@ function updateClockElement(container, date, tz) {
     return;
   }
 
-  // Update jam:menit dengan flip kalau berubah
   const oldHM = hmEl.textContent;
   const newHM = t.main;
   if (oldHM !== newHM) {
     animateFlip(hmEl, newHM);
   }
 
-  // Update detik dengan flip
   if (secEl) {
     const oldSec = secEl.dataset.flip;
     const newSec = t.seconds;
@@ -336,7 +329,6 @@ function updateClockElement(container, date, tz) {
     }
   }
 
-  // Update AM/PM kalau berubah
   if (ampmEl && t.suffix.trim()) {
     const newAMPM = t.suffix.trim();
     if (ampmEl.textContent !== newAMPM) {
