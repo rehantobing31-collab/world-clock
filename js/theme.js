@@ -1,15 +1,11 @@
 // ============================================
-// WORLD CLOCK — Theme Switcher + Anti-Copy
+// WORLD CLOCK — Theme Switcher + Format Toggle + Anti-Copy
 // ============================================
 
 const THEMES = ['midnight', 'light', 'ocean', 'forest', 'nord', 'sepia'];
 const THEME_ICONS = {
-  midnight: '🌙',
-  light: '☀️',
-  ocean: '🌊',
-  forest: '🌲',
-  nord: '❄️',
-  sepia: '📜',
+  midnight: '🌙', light: '☀️', ocean: '🌊',
+  forest: '🌲', nord: '❄️', sepia: '📜',
 };
 
 function initTheme() {
@@ -46,42 +42,59 @@ function initTheme() {
 function applyTheme(theme) {
   document.documentElement.setAttribute('data-theme', theme);
   localStorage.setItem('wc_theme', theme);
-
   const icon = document.getElementById('themeIcon');
   if (icon) icon.textContent = THEME_ICONS[theme] || '🌙';
-
   document.querySelectorAll('.theme-option').forEach(opt => {
     opt.classList.toggle('active', opt.dataset.theme === theme);
   });
 }
 
 // ============================================
-// ANTI-COPY (basic)
+// FORMAT TOGGLE (12 / 24 jam)
+// ============================================
+function initFormatToggle() {
+  const btn = document.getElementById('formatToggle');
+  if (!btn) return;
+
+  updateFormatButton();
+
+  btn.addEventListener('click', () => {
+    const curr = getTimeFormat();
+    setTimeFormat(curr === '24' ? '12' : '24');
+    updateFormatButton();
+
+    // Refresh semua tampilan jam
+    if (typeof updateClocks === 'function') updateClocks();
+  });
+}
+
+function updateFormatButton() {
+  const btn = document.getElementById('formatToggle');
+  if (!btn) return;
+  const fmt = getTimeFormat();
+  btn.textContent = fmt === '12' ? '12h' : '24h';
+  btn.title = `Format: ${fmt === '12' ? '12 jam (AM/PM)' : '24 jam'} — klik untuk ganti`;
+}
+
+// ============================================
+// ANTI-COPY
 // ============================================
 function initAntiCopy() {
   document.body.classList.add('no-select');
 
-  document.addEventListener('contextmenu', (e) => {
-    e.preventDefault();
-    return false;
-  });
+  document.addEventListener('contextmenu', (e) => e.preventDefault());
 
   document.addEventListener('keydown', (e) => {
     if (e.key === 'F12') { e.preventDefault(); return false; }
-
     if (e.ctrlKey && e.shiftKey && ['I', 'J', 'C'].includes(e.key.toUpperCase())) {
-      e.preventDefault();
-      return false;
+      e.preventDefault(); return false;
     }
-
     if (e.ctrlKey && e.key.toUpperCase() === 'U') { e.preventDefault(); return false; }
     if (e.ctrlKey && e.key.toUpperCase() === 'S') { e.preventDefault(); return false; }
-
     if (e.ctrlKey && e.key.toUpperCase() === 'A') {
       const tag = document.activeElement.tagName;
       if (tag !== 'INPUT' && tag !== 'TEXTAREA') { e.preventDefault(); return false; }
     }
-
     if (e.ctrlKey && ['C', 'X'].includes(e.key.toUpperCase())) {
       const tag = document.activeElement.tagName;
       if (tag !== 'INPUT' && tag !== 'TEXTAREA') { e.preventDefault(); return false; }
