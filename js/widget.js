@@ -1,5 +1,5 @@
 // ============================================
-// WORLD CLOCK — Widget Bar (sticky di atas)
+// WORLD CLOCK — Widget Bar + Elegant Motion
 // ============================================
 
 let widgetCities = [];
@@ -29,6 +29,12 @@ function initWidget() {
   });
   document.getElementById('widgetPickerSearch').addEventListener('input', (e) => {
     renderWidgetPickerList(e.target.value.toLowerCase());
+  });
+
+  // Ripple di widget buttons
+  ['widgetAddBtn', 'widgetCloseBtn', 'widgetShowBtn'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) attachRipple(el);
   });
 
   renderWidget();
@@ -82,7 +88,7 @@ function renderWidget() {
   const now = getNow();
   content.innerHTML = '';
 
-  widgetCities.forEach(cityId => {
+  widgetCities.forEach((cityId, idx) => {
     const city = CITIES.find(c => c.id === cityId);
     if (!city) return;
 
@@ -94,6 +100,7 @@ function renderWidget() {
     item.className = 'widget-clock-item' + (isActive ? ' is-active' : '');
     item.dataset.widgetCity = cityId;
     item.dataset.dayState = dayState;
+    item.style.animation = `itemFadeIn 0.35s ease ${idx * 40}ms backwards`;
     item.innerHTML = `
       <span class="w-icon">${city.flag}</span>
       <span class="w-time" data-widget-time="${cityId}">${renderClockHTML(now, city.tz)}</span>
@@ -110,6 +117,7 @@ function renderWidget() {
       highlightPinnedActive();
     });
 
+    attachRipple(item);
     content.appendChild(item);
   });
 
@@ -135,9 +143,8 @@ function updateWidgetClocks() {
     if (!city) return;
 
     const timeEl = item.querySelector(`[data-widget-time="${cityId}"]`);
-    if (timeEl) timeEl.innerHTML = renderClockHTML(now, city.tz);
+    if (timeEl) updateClockElement(timeEl, now, city.tz);
 
-    // Update day/night icon
     const dayState = getDayNightState(city, now);
     const iconEl = item.querySelector('.w-daynight');
     if (iconEl) {
@@ -235,6 +242,7 @@ function renderWidgetPickerList(query) {
       renderWidgetPickerList(query);
       highlightPinnedActive();
     });
+    attachRipple(item);
     list.appendChild(item);
   });
 }
