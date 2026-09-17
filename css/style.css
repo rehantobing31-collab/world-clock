@@ -1,9 +1,9 @@
 /* ============================================
-   WORLD CLOCK — Stylesheet v3
-   Nyaman di mata · Estetik · Kalem
+   WORLD CLOCK — Stylesheet v4
+   + Format toggle · + Day/Night indicator
    ============================================ */
 
-/* ===== MIDNIGHT (default) — deep navy + soft amber ===== */
+/* ===== MIDNIGHT ===== */
 :root,
 [data-theme="midnight"] {
   --bg: #0d1017;
@@ -21,6 +21,8 @@
   --accent-2: #8fb3d9;
   --danger: #e88b8b;
   --success: #8fc78a;
+  --day: #f6c453;
+  --night: #8fb3d9;
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
   --shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
   --shadow-lg: 0 12px 36px rgba(0, 0, 0, 0.45);
@@ -28,7 +30,6 @@
   --radius-sm: 10px;
 }
 
-/* ===== LIGHT — warm off-white + terracotta ===== */
 [data-theme="light"] {
   --bg: #f7f4ee;
   --bg-gradient: linear-gradient(180deg, #f0ece2 0%, #f7f4ee 30%, #f7f4ee 100%);
@@ -45,12 +46,13 @@
   --accent-2: #5c7a99;
   --danger: #b8443a;
   --success: #5e7d4a;
+  --day: #d97706;
+  --night: #4c5d8a;
   --shadow-sm: 0 1px 2px rgba(58, 50, 38, 0.05);
   --shadow: 0 4px 16px rgba(58, 50, 38, 0.07);
   --shadow-lg: 0 12px 32px rgba(58, 50, 38, 0.1);
 }
 
-/* ===== OCEAN — deep teal kalem ===== */
 [data-theme="ocean"] {
   --bg: #0c1a1e;
   --bg-gradient: radial-gradient(ellipse 80% 60% at 50% -10%, #14282e 0%, #0c1a1e 70%);
@@ -67,12 +69,13 @@
   --accent-2: #a8c8d8;
   --danger: #e08a8a;
   --success: #a3d49a;
+  --day: #f4d06f;
+  --night: #a8c8d8;
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.35);
   --shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
   --shadow-lg: 0 12px 36px rgba(0, 0, 0, 0.5);
 }
 
-/* ===== FOREST — sage green gelap ===== */
 [data-theme="forest"] {
   --bg: #101510;
   --bg-gradient: radial-gradient(ellipse 80% 60% at 50% -10%, #1a2419 0%, #101510 70%);
@@ -89,12 +92,13 @@
   --accent-2: #9db89a;
   --danger: #d98880;
   --success: #a3c988;
+  --day: #f0d878;
+  --night: #9db89a;
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.35);
   --shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
   --shadow-lg: 0 12px 36px rgba(0, 0, 0, 0.5);
 }
 
-/* ===== NORD ===== */
 [data-theme="nord"] {
   --bg: #2e3440;
   --bg-gradient: radial-gradient(ellipse 80% 60% at 50% -10%, #3b4252 0%, #2e3440 70%);
@@ -111,12 +115,13 @@
   --accent-2: #88c0d0;
   --danger: #bf616a;
   --success: #a3be8c;
+  --day: #ebcb8b;
+  --night: #81a1c1;
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.25);
   --shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
   --shadow-lg: 0 12px 36px rgba(0, 0, 0, 0.4);
 }
 
-/* ===== SEPIA — cream + cokelat hangat ===== */
 [data-theme="sepia"] {
   --bg: #f0e8d5;
   --bg-gradient: linear-gradient(180deg, #e8dfc8 0%, #f0e8d5 40%);
@@ -133,13 +138,14 @@
   --accent-2: #6d7d52;
   --danger: #a84438;
   --success: #6d8a44;
+  --day: #c87a2c;
+  --night: #5c6e7d;
   --shadow-sm: 0 1px 2px rgba(58, 50, 38, 0.06);
   --shadow: 0 4px 16px rgba(58, 50, 38, 0.08);
   --shadow-lg: 0 12px 32px rgba(58, 50, 38, 0.12);
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
-
 html { scroll-behavior: smooth; }
 
 body {
@@ -151,11 +157,10 @@ body {
   min-height: 100vh;
   transition: background-color 0.4s ease, color 0.4s ease;
   -webkit-font-smoothing: antialiased;
-  padding-top: 0;
 }
 
 /* ============================================
-   WIDGET BAR (sticky di atas)
+   WIDGET BAR
    ============================================ */
 .widget-bar {
   position: sticky;
@@ -195,8 +200,8 @@ body {
 .widget-clock-item {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 6px 14px;
+  gap: 8px;
+  padding: 6px 12px;
   background: var(--bg-card);
   border: 1px solid var(--border);
   border-radius: 10px;
@@ -220,20 +225,31 @@ body {
   box-shadow: 0 0 0 1px var(--accent), var(--accent-glow);
 }
 
-.widget-clock-item .w-icon {
-  font-size: 0.95rem;
-  opacity: 0.75;
-}
+.widget-clock-item .w-icon { font-size: 0.95rem; opacity: 0.75; }
 
 .widget-clock-item .w-time {
   letter-spacing: -0.3px;
   font-variant-numeric: tabular-nums;
 }
 
-.widget-clock-item .w-time .w-sec {
+.widget-clock-item .w-time .hm { color: var(--text); }
+.widget-clock-item .w-time .seconds {
   font-size: 0.75rem;
   opacity: 0.6;
   margin-left: 1px;
+}
+.widget-clock-item .w-time .ampm {
+  font-size: 0.7rem;
+  color: var(--accent);
+  font-weight: 700;
+  margin-left: 3px;
+  letter-spacing: 0.5px;
+}
+
+.widget-clock-item .w-daynight {
+  font-size: 0.85rem;
+  opacity: 0.85;
+  margin-left: 2px;
 }
 
 .widget-clock-item .w-tz {
@@ -260,20 +276,10 @@ body {
   transition: all 0.15s;
 }
 
-.widget-clock-item:hover .w-remove {
-  opacity: 1;
-}
+.widget-clock-item:hover .w-remove { opacity: 1; }
+.widget-clock-item .w-remove:hover { color: var(--danger); background: rgba(255, 255, 255, 0.05); }
 
-.widget-clock-item .w-remove:hover {
-  color: var(--danger);
-  background: rgba(255, 255, 255, 0.05);
-}
-
-.widget-actions {
-  display: flex;
-  gap: 6px;
-  flex-shrink: 0;
-}
+.widget-actions { display: flex; gap: 6px; flex-shrink: 0; }
 
 .widget-btn {
   background: var(--bg-card);
@@ -297,7 +303,6 @@ body {
   background: var(--accent-soft);
 }
 
-/* Tombol kecil buat munculin balik widget */
 .widget-show-btn {
   position: fixed;
   top: 12px;
@@ -333,7 +338,6 @@ body {
   padding: 28px 22px 60px;
 }
 
-/* ===== HEADER ===== */
 .header {
   display: flex;
   justify-content: space-between;
@@ -362,6 +366,32 @@ body {
 }
 
 .header-right { display: flex; align-items: center; gap: 10px; position: relative; }
+
+/* ===== FORMAT TOGGLE BUTTON ===== */
+.format-toggle {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  color: var(--text);
+  height: 42px;
+  padding: 0 14px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 700;
+  font-family: 'JetBrains Mono', monospace;
+  letter-spacing: 0.5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  min-width: 52px;
+}
+
+.format-toggle:hover {
+  background: var(--bg-card-hover);
+  border-color: var(--accent);
+  color: var(--accent);
+}
 
 /* ===== THEME SWITCHER ===== */
 .theme-switcher { position: relative; }
@@ -443,7 +473,6 @@ body {
 .swatch[data-swatch="nord"] { background: linear-gradient(135deg, #2e3440, #d8b678); }
 .swatch[data-swatch="sepia"] { background: linear-gradient(135deg, #f0e8d5, #9c5a2c); }
 
-/* ===== OVERRIDE BADGE ===== */
 .override-badge {
   display: flex;
   align-items: center;
@@ -475,7 +504,6 @@ body {
 
 .override-badge button:hover { background: rgba(0, 0, 0, 0.35); }
 
-/* ===== OVERRIDE PANEL ===== */
 .override-panel {
   background: var(--bg-elev);
   border: 1px solid var(--border);
@@ -535,14 +563,11 @@ body {
 }
 
 .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 4px 16px var(--accent-glow); }
-.btn-primary:active { transform: translateY(0); }
-
 .btn-ghost {
   background: var(--bg-card);
   color: var(--text);
   border: 1px solid var(--border);
 }
-
 .btn-ghost:hover { background: var(--bg-card-hover); border-color: var(--border-strong); }
 
 .hint {
@@ -562,7 +587,6 @@ body {
   border: 1px solid var(--border);
 }
 
-/* ===== SECTION TITLE ===== */
 .section-title {
   font-size: 1rem;
   font-weight: 700;
@@ -598,6 +622,16 @@ body {
   transition: all 0.25s ease;
   cursor: pointer;
   box-shadow: var(--shadow-sm);
+  overflow: hidden;
+}
+
+.pinned-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--accent), transparent);
+  opacity: 0.6;
 }
 
 .pinned-card:hover {
@@ -626,6 +660,19 @@ body {
   50% { opacity: 0.4; }
 }
 
+/* Day/Night card indicator */
+.pinned-card[data-day-state="night"] {
+  background: linear-gradient(160deg, var(--bg-card) 0%, rgba(20, 28, 45, 0.5) 100%);
+}
+.pinned-card[data-day-state="night"]::before {
+  background: linear-gradient(90deg, transparent, var(--night), transparent);
+  opacity: 0.4;
+}
+.pinned-card[data-day-state="day"]::before {
+  background: linear-gradient(90deg, transparent, var(--day), transparent);
+  opacity: 0.4;
+}
+
 .pinned-header {
   display: flex;
   justify-content: space-between;
@@ -634,13 +681,7 @@ body {
   gap: 10px;
 }
 
-.pinned-city {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  min-width: 0;
-}
-
+.pinned-city { display: flex; align-items: center; gap: 12px; min-width: 0; }
 .pinned-flag { font-size: 1.7rem; line-height: 1; }
 
 .pinned-name {
@@ -702,16 +743,47 @@ body {
   font-weight: 500;
 }
 
+.digital-clock .ampm {
+  font-size: 1rem;
+  color: var(--accent);
+  margin-left: 6px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  vertical-align: top;
+  padding-top: 6px;
+  display: inline-block;
+}
+
 .date-line {
   font-size: 0.78rem;
   color: var(--text-dim);
   display: flex;
   justify-content: space-between;
+  align-items: center;
   margin-top: 10px;
   gap: 8px;
   flex-wrap: wrap;
-  align-items: center;
 }
+
+.day-night-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.2px;
+  padding: 3px 8px;
+  border-radius: 6px;
+  background: var(--bg-elev);
+  border: 1px solid var(--border);
+}
+
+.pinned-card[data-day-state="day"] .day-night-label { color: var(--day); }
+.pinned-card[data-day-state="night"] .day-night-label { color: var(--night); }
+.pinned-card[data-day-state="sunrise"] .day-night-label { color: var(--accent); }
+.pinned-card[data-day-state="sunset"] .day-night-label { color: var(--accent); }
+
+.dn-icon { font-size: 0.85rem; }
 
 .tz-badge {
   font-size: 0.7rem;
@@ -740,6 +812,7 @@ body {
   padding: 14px 16px;
   transition: all 0.15s;
   box-shadow: var(--shadow-sm);
+  position: relative;
 }
 
 .city-card:hover {
@@ -749,11 +822,14 @@ body {
   box-shadow: var(--shadow);
 }
 
+.city-card[data-day-state="night"] { background: linear-gradient(160deg, var(--bg-card), rgba(20, 28, 45, 0.3)); }
+
 .city-card-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 8px;
+  gap: 8px;
 }
 
 .city-flag { font-size: 1.2rem; line-height: 1; }
@@ -776,6 +852,12 @@ body {
   text-overflow: ellipsis;
 }
 
+.city-daynight {
+  font-size: 0.85rem;
+  opacity: 0.85;
+  flex-shrink: 0;
+}
+
 .city-clock {
   font-family: 'JetBrains Mono', monospace;
   font-size: 1.35rem;
@@ -786,11 +868,19 @@ body {
   line-height: 1.1;
 }
 
+.city-clock .hm { color: var(--text); }
 .city-clock .seconds {
   font-size: 0.8rem;
   color: var(--text-dim);
   margin-left: 2px;
   font-weight: 500;
+}
+.city-clock .ampm {
+  font-size: 0.7rem;
+  color: var(--accent);
+  margin-left: 4px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
 }
 
 .city-date {
@@ -868,10 +958,7 @@ body {
 
 .modal[hidden] { display: none; }
 
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
 .modal-content {
   background: var(--bg-elev);
@@ -916,8 +1003,7 @@ body {
 
 .modal-close:hover { background: var(--bg-card-hover); color: var(--text); }
 
-#pickerSearch,
-#widgetPickerSearch {
+#pickerSearch, #widgetPickerSearch {
   margin: 14px 20px 0;
   padding: 10px 14px;
   background: var(--bg-card);
@@ -929,8 +1015,7 @@ body {
   transition: border 0.2s, box-shadow 0.2s;
 }
 
-#pickerSearch:focus,
-#widgetPickerSearch:focus {
+#pickerSearch:focus, #widgetPickerSearch:focus {
   outline: none;
   border-color: var(--accent);
   box-shadow: 0 0 0 3px var(--accent-soft);
@@ -945,7 +1030,6 @@ body {
 }
 
 .picker-list::-webkit-scrollbar { width: 8px; }
-.picker-list::-webkit-scrollbar-track { background: transparent; }
 .picker-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
 .picker-list::-webkit-scrollbar-thumb:hover { background: var(--border-strong); }
 
@@ -961,7 +1045,6 @@ body {
 }
 
 .picker-item:hover { background: var(--bg-card-hover); border-color: var(--border); }
-
 .picker-item .flag { font-size: 1.2rem; line-height: 1; }
 .picker-item .name { font-size: 0.875rem; font-weight: 600; }
 .picker-item .country { font-size: 0.72rem; color: var(--text-dim); margin-top: 2px; }
@@ -977,8 +1060,7 @@ body {
 }
 
 /* ===== ANTI-COPY ===== */
-body.no-select,
-body.no-select * {
+body.no-select, body.no-select * {
   -webkit-user-select: none;
   -moz-user-select: none;
   -ms-user-select: none;
@@ -986,8 +1068,7 @@ body.no-select * {
   -webkit-touch-callout: none;
 }
 
-body.no-select input,
-body.no-select textarea {
+body.no-select input, body.no-select textarea {
   -webkit-user-select: text;
   -moz-user-select: text;
   -ms-user-select: text;
@@ -999,6 +1080,7 @@ body.no-select textarea {
   .app { padding: 18px 14px 40px; }
   .digital-clock { font-size: 2.15rem; }
   .digital-clock .seconds { font-size: 1.2rem; }
+  .digital-clock .ampm { font-size: 0.85rem; padding-top: 4px; }
   .city-clock { font-size: 1.15rem; }
   .search-box input { width: 100%; }
   .input-row input { min-width: 100%; }
@@ -1009,17 +1091,22 @@ body.no-select textarea {
   .widget-content { gap: 12px; }
   .widget-clock-item { font-size: 0.85rem; padding: 5px 10px; }
   .widget-clock-item .w-tz { font-size: 0.65rem; }
+  .format-toggle { height: 38px; padding: 0 10px; font-size: 0.78rem; min-width: 46px; }
+  .theme-btn { width: 38px; height: 38px; }
 }
 
 @media (max-width: 480px) {
   .digital-clock { font-size: 1.85rem; }
   .digital-clock .seconds { font-size: 1.05rem; }
+  .digital-clock .ampm { font-size: 0.75rem; }
   .pinned-grid { grid-template-columns: 1fr; }
   .all-grid { grid-template-columns: 1fr 1fr; }
   .city-clock { font-size: 1rem; }
-  .widget-clock-item { font-size: 0.78rem; padding: 4px 9px; }
-  .widget-clock-item .w-sec { font-size: 0.65rem; }
+  .city-clock .ampm { font-size: 0.62rem; }
+  .widget-clock-item { font-size: 0.78rem; padding: 4px 9px; gap: 5px; }
+  .widget-clock-item .w-sec, .widget-clock-item .seconds { font-size: 0.65rem; }
   .widget-clock-item .w-tz { display: none; }
+  .widget-clock-item .w-daynight { font-size: 0.75rem; }
 }
 
 @media (max-width: 380px) {
@@ -1028,8 +1115,4 @@ body.no-select textarea {
 
 /* ===== UTILITIES ===== */
 [hidden] { display: none !important; }
-
-::selection {
-  background: var(--accent);
-  color: var(--bg);
-}
+::selection { background: var(--accent); color: var(--bg); }
