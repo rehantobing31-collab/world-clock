@@ -31,7 +31,6 @@ function initWidget() {
     renderWidgetPickerList(e.target.value.toLowerCase());
   });
 
-  // Ripple di widget buttons
   ['widgetAddBtn', 'widgetCloseBtn', 'widgetShowBtn'].forEach(id => {
     const el = document.getElementById(id);
     if (el) attachRipple(el);
