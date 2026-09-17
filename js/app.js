@@ -1,5 +1,5 @@
 // ============================================
-// WORLD CLOCK — Logic UI + Elegant Motion
+// WORLD CLOCK — Logic UI + All Modules
 // ============================================
 
 const DEFAULT_PINNED = ['jakarta', 'singapore', 'colombo'];
@@ -15,6 +15,12 @@ document.addEventListener('DOMContentLoaded', () => {
   initFormatToggle();
   initAntiCopy();
   initWidget();
+  initAurora();
+  initSound();
+  initMood();
+  initCursorTrail();
+  initShare();
+  initKonamiCode();
   setupEventListeners();
   renderPinned();
   renderAllCities();
@@ -55,10 +61,12 @@ function setupEventListeners() {
     if (!result.ok) {
       hint.style.color = 'var(--danger)';
       hint.textContent = '❌ Format tidak valid. Contoh: 20:15 WIB, 14:30 UTC, 09:00 Tokyo, 8:30 PM Singapore';
+      playSound('error');
       return;
     }
     hint.style.color = 'var(--success)';
     hint.textContent = `✅ Time travel aktif ke ${result.target.toLocaleString('id-ID')}`;
+    playSound('success');
     showOverrideBadge(input.trim());
     renderPinned();
     renderAllCities();
@@ -86,6 +94,7 @@ function setupEventListeners() {
       document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
       tab.classList.add('active');
       activeRegion = tab.dataset.region;
+      playSound('click');
       renderAllCities();
       requestAnimationFrame(() => staggerFadeIn(document.getElementById('allGrid')));
     });
@@ -165,22 +174,29 @@ function renderPinned() {
         </span>
         <span class="date-text">${date}</span>
         <span class="tz-badge">${offset}</span>
+        <span class="analog-slot" data-analog="${city.id}" title="Analog clock"></span>
       </div>
     `;
 
     card.addEventListener('click', (e) => {
       if (e.target.classList.contains('change-btn') || e.target.closest('.change-btn')) return;
       setActiveWidgetCity(city.id);
+      playSound('click');
     });
 
     attachRipple(card);
     grid.appendChild(card);
+
+    // Render analog clock untuk kartu ini
+    const analogSlot = card.querySelector('.analog-slot');
+    if (analogSlot) renderAnalogClock(analogSlot, now, city.tz);
   });
 
   grid.querySelectorAll('.change-btn').forEach(btn => {
     btn.addEventListener('click', (e) => {
       e.stopPropagation();
       openPicker(parseInt(btn.dataset.slot));
+      playSound('click');
     });
   });
 }
@@ -264,6 +280,10 @@ function updateClocks() {
       if (dateText) dateText.textContent = date;
       if (tzBadge) tzBadge.textContent = offset;
     }
+
+    // Update analog clock
+    const analogSlot = card?.querySelector('.analog-slot');
+    if (analogSlot) renderAnalogClock(analogSlot, now, city.tz);
   });
 
   document.querySelectorAll('[data-city-time]').forEach(clockEl => {
@@ -294,9 +314,6 @@ function updateClocks() {
   updateWidgetClocks();
 }
 
-/**
- * Update jam di elemen dengan animasi flip.
- */
 function updateClockElement(container, date, tz) {
   const t = formatTimeDisplay(date, tz);
 
@@ -382,6 +399,7 @@ function renderPickerList(query) {
         renderPinned();
         renderWidget();
         highlightPinnedActive();
+        playSound('success');
         closePicker();
         requestAnimationFrame(() => staggerFadeIn(document.getElementById('pinnedGrid')));
       }
