@@ -13,15 +13,20 @@ function initWidget() {
     widgetHidden = true;
     saveWidgetState();
     renderWidget();
+    playSound('click');
   });
 
   document.getElementById('widgetShowBtn').addEventListener('click', () => {
     widgetHidden = false;
     saveWidgetState();
     renderWidget();
+    playSound('click');
   });
 
-  document.getElementById('widgetAddBtn').addEventListener('click', openWidgetPicker);
+  document.getElementById('widgetAddBtn').addEventListener('click', () => {
+    openWidgetPicker();
+    playSound('click');
+  });
 
   document.getElementById('closeWidgetPicker').addEventListener('click', closeWidgetPicker);
   document.getElementById('widgetPickerModal').addEventListener('click', (e) => {
@@ -114,6 +119,7 @@ function renderWidget() {
       saveWidgetState();
       renderWidget();
       highlightPinnedActive();
+      playSound('click');
     });
 
     attachRipple(item);
@@ -240,6 +246,7 @@ function renderWidgetPickerList(query) {
       renderWidget();
       renderWidgetPickerList(query);
       highlightPinnedActive();
+      playSound('click');
     });
     attachRipple(item);
     list.appendChild(item);
