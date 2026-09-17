@@ -12,6 +12,7 @@ let editingSlot = null;
 document.addEventListener('DOMContentLoaded', () => {
   loadState();
   initTheme();
+  initFormatToggle();
   initAntiCopy();
   initWidget();
   setupEventListeners();
@@ -118,14 +119,16 @@ function renderPinned() {
   pinnedIds.forEach((id, index) => {
     const city = CITIES.find(c => c.id === id);
     if (!city) return;
-    const time = formatTime(now, city.tz);
     const date = formatDate(now, city.tz);
     const offset = formatOffsetLabel(now, city.tz);
+    const dayState = getDayNightState(city, now);
+    const dayIcon = getDayNightIcon(dayState);
 
     const card = document.createElement('div');
     card.className = 'pinned-card';
     card.dataset.pinnedIndex = index;
     card.dataset.pinnedCity = city.id;
+    card.dataset.dayState = dayState;
     card.innerHTML = `
       <div class="pinned-header">
         <div class="pinned-city">
@@ -138,15 +141,18 @@ function renderPinned() {
         <button class="change-btn" data-slot="${index}">Ganti</button>
       </div>
       <div class="digital-clock" data-pinned-time="${index}">
-        <span class="hm">${time.hour}:${time.minute}</span><span class="seconds">:${time.second}</span>
+        ${renderClockHTML(now, city.tz)}
       </div>
       <div class="date-line">
-        <span>${date}</span>
+        <span class="day-night-label">
+          <span class="dn-icon">${dayIcon}</span>
+          <span class="dn-text">${dayState === 'day' ? 'Siang' : dayState === 'night' ? 'Malam' : dayState === 'sunrise' ? 'Subuh' : 'Senja'}</span>
+        </span>
+        <span class="date-text">${date}</span>
         <span class="tz-badge">${offset}</span>
       </div>
     `;
 
-    // Klik kartu → set aktif di widget
     card.addEventListener('click', (e) => {
       if (e.target.classList.contains('change-btn') || e.target.closest('.change-btn')) return;
       setActiveWidgetCity(city.id);
@@ -169,9 +175,7 @@ function renderAllCities() {
   const now = getNow();
   let list = CITIES;
 
-  if (activeRegion !== 'all') {
-    list = list.filter(c => c.region === activeRegion);
-  }
+  if (activeRegion !== 'all') list = list.filter(c => c.region === activeRegion);
   if (searchQuery) {
     list = list.filter(c =>
       c.city.toLowerCase().includes(searchQuery) ||
@@ -186,11 +190,13 @@ function renderAllCities() {
 
   grid.innerHTML = '';
   list.forEach(city => {
-    const time = formatTime(now, city.tz);
     const date = formatDate(now, city.tz);
+    const dayState = getDayNightState(city, now);
+    const dayIcon = getDayNightIcon(dayState);
 
     const card = document.createElement('div');
     card.className = 'city-card';
+    card.dataset.dayState = dayState;
     card.innerHTML = `
       <div class="city-card-header">
         <span class="city-flag">${city.flag}</span>
@@ -198,9 +204,10 @@ function renderAllCities() {
           <div class="city-name">${city.city}</div>
           <div class="city-country">${city.country}</div>
         </div>
+        <span class="city-daynight" title="${dayState}">${dayIcon}</span>
       </div>
       <div class="city-clock" data-city-time="${city.id}">
-        ${time.hour}:${time.minute}<span class="seconds">:${time.second}</span>
+        ${renderClockHTML(now, city.tz)}
       </div>
       <div class="city-date">${date}</div>
     `;
@@ -220,20 +227,25 @@ function updateClocks() {
   pinnedIds.forEach((id, index) => {
     const city = CITIES.find(c => c.id === id);
     if (!city) return;
-    const time = formatTime(now, city.tz);
     const date = formatDate(now, city.tz);
     const offset = formatOffsetLabel(now, city.tz);
+    const dayState = getDayNightState(city, now);
+    const dayIcon = getDayNightIcon(dayState);
 
     const clockEl = document.querySelector(`[data-pinned-time="${index}"]`);
-    if (clockEl) {
-      clockEl.innerHTML = `<span class="hm">${time.hour}:${time.minute}</span><span class="seconds">:${time.second}</span>`;
-    }
+    if (clockEl) clockEl.innerHTML = renderClockHTML(now, city.tz);
+
     const card = clockEl?.closest('.pinned-card');
     if (card) {
-      const dateLine = card.querySelector('.date-line');
-      if (dateLine) {
-        dateLine.innerHTML = `<span>${date}</span><span class="tz-badge">${offset}</span>`;
-      }
+      card.dataset.dayState = dayState;
+      const dnIcon = card.querySelector('.dn-icon');
+      const dnText = card.querySelector('.dn-text');
+      const dateText = card.querySelector('.date-text');
+      const tzBadge = card.querySelector('.tz-badge');
+      if (dnIcon) dnIcon.textContent = dayIcon;
+      if (dnText) dnText.textContent = dayState === 'day' ? 'Siang' : dayState === 'night' ? 'Malam' : dayState === 'sunrise' ? 'Subuh' : 'Senja';
+      if (dateText) dateText.textContent = date;
+      if (tzBadge) tzBadge.textContent = offset;
     }
   });
 
@@ -241,16 +253,27 @@ function updateClocks() {
     const id = clockEl.dataset.cityTime;
     const city = CITIES.find(c => c.id === id);
     if (!city) return;
-    const time = formatTime(now, city.tz);
     const date = formatDate(now, city.tz);
-    clockEl.innerHTML = `${time.hour}:${time.minute}<span class="seconds">:${time.second}</span>`;
-    const dateEl = clockEl.nextElementSibling;
-    if (dateEl && dateEl.classList.contains('city-date')) {
-      dateEl.textContent = date;
+    const dayState = getDayNightState(city, now);
+    const dayIcon = getDayNightIcon(dayState);
+
+    clockEl.innerHTML = renderClockHTML(now, city.tz);
+
+    const card = clockEl.closest('.city-card');
+    if (card) {
+      card.dataset.dayState = dayState;
+      const dnEl = card.querySelector('.city-daynight');
+      if (dnEl) {
+        dnEl.textContent = dayIcon;
+        dnEl.title = dayState;
+      }
+      const dateEl = clockEl.nextElementSibling;
+      if (dateEl && dateEl.classList.contains('city-date')) {
+        dateEl.textContent = date;
+      }
     }
   });
 
-  // Update widget juga
   updateWidgetClocks();
 }
 
@@ -293,12 +316,9 @@ function renderPickerList(query) {
         const oldId = pinnedIds[editingSlot];
         pinnedIds[editingSlot] = city.id;
         savePinned();
-
-        // Update widget juga
         widgetCities = widgetCities.map(c => c === oldId ? city.id : c);
         if (activeWidgetCity === oldId) activeWidgetCity = city.id;
         saveWidgetState();
-
         renderPinned();
         renderWidget();
         highlightPinnedActive();
