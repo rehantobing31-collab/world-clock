@@ -2,8 +2,8 @@
 // WORLD CLOCK — Time Lab Section
 // ============================================
 
-let labSliderTz = 'Asia/Jakarta'; // Basis WIB default
-let labOverrideTime = null;        // null = live, atau { hh, mm }
+let labSliderTz = 'Asia/Jakarta';
+let labOverrideTime = null;
 let labIsDragging = false;
 
 function initTimeLab() {
@@ -14,7 +14,6 @@ function initTimeLab() {
 
   if (!slider) return;
 
-  // Set slider value ke waktu WIB sekarang
   updateLabSliderToNow();
 
   slider.addEventListener('input', (e) => {
@@ -24,16 +23,13 @@ function initTimeLab() {
     const mm = minutes % 60;
     labOverrideTime = { hh, mm };
 
-    // Update label
     const label = `${String(hh).padStart(2, '0')}:${String(mm).padStart(2, '0')}`;
     const tzLabel = getShortTzLabel(labSliderTz);
     hint.textContent = `${label} ${tzLabel}`;
 
-    // Apply ke override global (biar sinkron dengan fitur time travel)
     const tzStr = getShortTzLabel(labSliderTz);
     applyTimeOverride(`${label} ${tzStr}`);
 
-    // Update semua tampilan
     refreshAllDisplays();
   });
 
@@ -58,14 +54,12 @@ function initTimeLab() {
     });
   }
 
-  // Update slider tiap 30 detik (kalau live)
   setInterval(() => {
     if (!labOverrideTime && !labIsDragging) {
       updateLabSliderToNow();
     }
   }, 30000);
 
-  // Initial render
   renderLabInfo();
 }
 
@@ -108,12 +102,10 @@ function renderLabInfo() {
   const city = CITIES.find(c => c.id === activeCityId);
   if (!city) return;
 
-  // Analog besar
   if (analogContainer) {
     renderAnalogLarge(analogContainer, now, city.tz);
   }
 
-  // Info panel
   const time = formatTime(now, city.tz);
   const date = formatDate(now, city.tz);
   const dayState = getDayNightState(city, now);
@@ -137,7 +129,7 @@ function renderLabInfo() {
         <div class="lab-info-tz">${city.tz} · ${tzLabel}</div>
       </div>
     </div>
-    <div class="lab-info-clock">${time.hour}:${time.minute}<span class="lab-info-sec">:${time.second}</span></div>
+    <div class="lab-info-clock" id="labInfoClock">${time.hour}:${time.minute}<span class="lab-info-sec">:${time.second}</span></div>
     <div class="lab-info-date">${date}</div>
     <div class="lab-info-pills">
       <span class="lab-pill lab-pill-status">
@@ -152,7 +144,6 @@ function renderLabInfo() {
     </div>
   `;
 
-  // Update title kota aktif di Time Lab
   const title = document.getElementById('labActiveCity');
   if (title) title.textContent = city.city;
 }
