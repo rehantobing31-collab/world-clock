@@ -2,6 +2,9 @@
 // WORLD CLOCK — Analog Clock (Mini + Presisi)
 // ============================================
 
+/**
+ * Hitung sudut jarum jam, menit, detik.
+ */
 function getClockAngles(date, tz) {
   const parts = new Intl.DateTimeFormat('en-GB', {
     timeZone: tz,
@@ -25,6 +28,9 @@ function getClockAngles(date, tz) {
   };
 }
 
+/**
+ * Bikin SVG analog clock (mini 40px atau besar 180px).
+ */
 function createAnalogSVG(size = 40) {
   const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
   svg.setAttribute('viewBox', '0 0 100 100');
@@ -35,6 +41,7 @@ function createAnalogSVG(size = 40) {
   const isLarge = size >= 100;
   const tickClass = isLarge ? 'analog-tick-large' : 'analog-tick';
 
+  // Ticks
   let ticksHTML = '';
   for (let i = 0; i < 12; i++) {
     const angle = i * 30;
@@ -53,6 +60,7 @@ function createAnalogSVG(size = 40) {
     ticksHTML += `<line x1="${x1.toFixed(2)}" y1="${y1.toFixed(2)}" x2="${x2.toFixed(2)}" y2="${y2.toFixed(2)}" class="${tickClass} ${isMajor ? 'major' : ''}" stroke-width="${width}" />`;
   }
 
+  // Angka 12, 3, 6, 9 (hanya untuk besar)
   let numbersHTML = '';
   if (isLarge) {
     const nums = [
@@ -63,22 +71,25 @@ function createAnalogSVG(size = 40) {
     ];
     nums.forEach(({ n, angle }) => {
       const rad = (angle - 90) * Math.PI / 180;
-      const r = 33;
+      const r = 32;
       const x = 50 + r * Math.cos(rad);
       const y = 50 + r * Math.sin(rad);
       numbersHTML += `<text x="${x}" y="${y}" class="analog-number" text-anchor="middle" dominant-baseline="central">${n}</text>`;
     });
   }
 
-  // ⚠️ PENTING: jarum dipendekin biar ujungnya di DALAM bulatan
+  // Penting: jarum dibungkus <g> dengan transform-origin di dalam SVG
+  // (bukan di CSS) biar rotasi presisi
   svg.innerHTML = `
     <circle cx="50" cy="50" r="46" class="analog-face-outer" />
     <circle cx="50" cy="50" r="40" class="analog-face-inner" />
     ${ticksHTML}
     ${numbersHTML}
-    <line x1="50" y1="50" x2="50" y2="30" class="analog-hour" stroke-width="${isLarge ? 4 : 2.5}" stroke-linecap="round" />
-    <line x1="50" y1="50" x2="50" y2="22" class="analog-minute" stroke-width="${isLarge ? 3 : 1.8}" stroke-linecap="round" />
-    <line x1="50" y1="52" x2="50" y2="18" class="analog-second" stroke-width="${isLarge ? 1.5 : 0.8}" stroke-linecap="round" />
+    <g class="analog-hands">
+      <line x1="50" y1="50" x2="50" y2="30" class="analog-hour" stroke-width="${isLarge ? 4 : 2.5}" stroke-linecap="round" />
+      <line x1="50" y1="50" x2="50" y2="22" class="analog-minute" stroke-width="${isLarge ? 3 : 1.8}" stroke-linecap="round" />
+      <line x1="50" y1="52" x2="50" y2="18" class="analog-second" stroke-width="${isLarge ? 1.5 : 0.8}" stroke-linecap="round" />
+    </g>
     <circle cx="50" cy="50" r="${isLarge ? 3 : 2}" class="analog-center" />
     <circle cx="50" cy="50" r="${isLarge ? 1.5 : 1}" class="analog-center-inner" />
   `;
@@ -86,6 +97,9 @@ function createAnalogSVG(size = 40) {
   return svg;
 }
 
+/**
+ * Update jarum jam di SVG yang udah ada.
+ */
 function updateAnalogSVG(svg, date, tz) {
   const { hour, minute, second } = getClockAngles(date, tz);
 
@@ -98,6 +112,9 @@ function updateAnalogSVG(svg, date, tz) {
   if (secHand) secHand.setAttribute('transform', `rotate(${second} 50 50)`);
 }
 
+/**
+ * Render analog clock kecil (buat kartu pinned).
+ */
 function renderAnalogClock(container, date, tz) {
   if (!container) return;
   let svg = container.querySelector('svg');
@@ -109,6 +126,9 @@ function renderAnalogClock(container, date, tz) {
   updateAnalogSVG(svg, date, tz);
 }
 
+/**
+ * Render analog clock BESAR (buat Time Lab).
+ */
 function renderAnalogLarge(container, date, tz) {
   if (!container) return;
   let svg = container.querySelector('svg');
