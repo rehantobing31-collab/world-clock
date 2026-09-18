@@ -79,6 +79,57 @@
       <div class="pinned-grid" id="pinnedGrid"></div>
     </section>
 
+    <!-- ============ TIME LAB ============ -->
+    <section class="lab-section">
+      <h2 class="section-title">🔬 Time Lab</h2>
+      <div class="lab-container">
+
+        <!-- Slider -->
+        <div class="lab-slider-block">
+          <div class="lab-slider-header">
+            <div class="lab-slider-title">
+              <span class="lab-slider-title-icon">⏱</span>
+              <span>Simulator Waktu</span>
+            </div>
+            <div class="lab-slider-controls">
+              <span class="lab-slider-hint" id="labTimeLabel">00:00 WIB</span>
+              <select class="lab-tz-select" id="labTzSelect" title="Basis timezone">
+                <option value="Asia/Jakarta">WIB</option>
+                <option value="Asia/Makassar">WITA</option>
+                <option value="Asia/Jayapura">WIT</option>
+                <option value="UTC">UTC</option>
+                <option value="Asia/Singapore">SGT</option>
+                <option value="Asia/Tokyo">JST</option>
+                <option value="Europe/London">GMT</option>
+                <option value="America/New_York">EST</option>
+              </select>
+              <button class="lab-reset-btn" id="labResetBtn">🔄 Live</button>
+            </div>
+          </div>
+          <input type="range" class="lab-slider" id="labSlider" min="0" max="1439" step="1" value="0" />
+          <div class="lab-slider-marks">
+            <span>00:00</span>
+            <span>06:00</span>
+            <span>12:00</span>
+            <span>18:00</span>
+            <span>23:59</span>
+          </div>
+        </div>
+
+        <!-- Info Grid -->
+        <div class="lab-info-grid">
+          <div class="lab-analog-wrap">
+            <div class="lab-analog" id="labAnalog"></div>
+            <div class="lab-analog-label">Analog Detik Presisi</div>
+          </div>
+          <div class="lab-info-content" id="labInfoContent">
+            <!-- Diisi oleh JS -->
+          </div>
+        </div>
+
+      </div>
+    </section>
+
     <section class="all-section">
       <div class="section-header">
         <h2 class="section-title">🌐 Semua Kota</h2>
@@ -130,6 +181,8 @@
   <script src="js/sun.js"></script>
   <script src="js/motion.js"></script>
   <script src="js/analog.js"></script>
+  <script src="js/landmark.js"></script>
+  <script src="js/lab.js"></script>
   <script src="js/aurora.js"></script>
   <script src="js/sound.js"></script>
   <script src="js/share.js"></script>
