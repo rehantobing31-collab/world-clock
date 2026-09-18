@@ -21,6 +21,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initCursorTrail();
   initShare();
   initKonamiCode();
+  initTimeLab();
   setupEventListeners();
   renderPinned();
   renderAllCities();
@@ -71,6 +72,7 @@ function setupEventListeners() {
     renderPinned();
     renderAllCities();
     renderWidget();
+    renderLabInfo();
     requestAnimationFrame(() => {
       staggerFadeIn(document.getElementById('pinnedGrid'));
       staggerFadeIn(document.getElementById('allGrid'));
@@ -126,6 +128,7 @@ function resetOverride() {
   renderPinned();
   renderAllCities();
   renderWidget();
+  renderLabInfo();
 }
 
 function showOverrideBadge(label) {
@@ -182,12 +185,12 @@ function renderPinned() {
       if (e.target.classList.contains('change-btn') || e.target.closest('.change-btn')) return;
       setActiveWidgetCity(city.id);
       playSound('click');
+      renderLabInfo();
     });
 
     attachRipple(card);
     grid.appendChild(card);
 
-    // Render analog clock untuk kartu ini
     const analogSlot = card.querySelector('.analog-slot');
     if (analogSlot) renderAnalogClock(analogSlot, now, city.tz);
   });
@@ -281,7 +284,6 @@ function updateClocks() {
       if (tzBadge) tzBadge.textContent = offset;
     }
 
-    // Update analog clock
     const analogSlot = card?.querySelector('.analog-slot');
     if (analogSlot) renderAnalogClock(analogSlot, now, city.tz);
   });
@@ -312,6 +314,25 @@ function updateClocks() {
   });
 
   updateWidgetClocks();
+
+  // Update analog besar di Time Lab
+  const labAnalog = document.getElementById('labAnalog');
+  if (labAnalog) {
+    const activeCityId = activeWidgetCity || pinnedIds[0];
+    const city = CITIES.find(c => c.id === activeCityId);
+    if (city) renderAnalogLarge(labAnalog, now, city.tz);
+  }
+
+  // Update jam digital di Time Lab
+  const labClockEl = document.getElementById('labInfoClock');
+  if (labClockEl) {
+    const activeCityId = activeWidgetCity || pinnedIds[0];
+    const city = CITIES.find(c => c.id === activeCityId);
+    if (city) {
+      const time = formatTime(now, city.tz);
+      labClockEl.innerHTML = `${time.hour}:${time.minute}<span class="lab-info-sec">:${time.second}</span>`;
+    }
+  }
 }
 
 function updateClockElement(container, date, tz) {
@@ -399,6 +420,7 @@ function renderPickerList(query) {
         renderPinned();
         renderWidget();
         highlightPinnedActive();
+        renderLabInfo();
         playSound('success');
         closePicker();
         requestAnimationFrame(() => staggerFadeIn(document.getElementById('pinnedGrid')));
